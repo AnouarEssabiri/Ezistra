@@ -62,13 +62,15 @@ export default function PersonalInfoSection() {
   const handleInputChange = (field: string, value: string) => {
     if (field.includes(".")) {
       const [parent, child] = field.split(".")
-      setEditedInfo(prev => ({
-        ...prev,
-        [parent]: {
-          ...(prev[parent] as any),
-          [child]: value,
-        },
-      }))
+      if (parent === "address" && child) {
+        setEditedInfo(prev => ({
+          ...prev,
+          address: {
+            ...prev.address,
+            [child]: value,
+          },
+        }))
+      }
     } else {
       setEditedInfo(prev => ({
         ...prev,
