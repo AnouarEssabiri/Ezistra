@@ -141,6 +141,14 @@ export default function MobilePage() {
             <Button variant="ghost" size="icon">
               <Bell className="h-5 w-5" />
             </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="text-xs px-2 py-1 h-8"
+              onClick={() => window.location.href = "/"}
+            >
+              Desktop
+            </Button>
             <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
               <span className="text-white text-xs font-medium">JD</span>
             </div>
