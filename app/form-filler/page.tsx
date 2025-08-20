@@ -95,6 +95,7 @@ export default function FormFillerPage() {
                 <Button variant="ghost" className="text-blue-600 bg-blue-50">
                   Form Filler
                 </Button>
+                <Button variant="ghost">Profile Settings</Button>
                 <Button variant="ghost">Settings</Button>
               </nav>
             </div>

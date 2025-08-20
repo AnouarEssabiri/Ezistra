@@ -98,6 +98,7 @@ export default function DashboardPage() {
                 </Button>
                 <Button variant="ghost">Documents</Button>
                 <Button variant="ghost">Form Filler</Button>
+                <Button variant="ghost">Profile Settings</Button>
                 <Button variant="ghost">Settings</Button>
               </nav>
             </div>
