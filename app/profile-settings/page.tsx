@@ -30,6 +30,7 @@ import Navigation from "@/components/Navigation"
 export default function ProfileSettingsPage() {
   const [activeTab, setActiveTab] = useState("personal-info")
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
+  const [isTabLoading, setIsTabLoading] = useState(false)
 
   const tabs = [
     {
@@ -80,11 +81,19 @@ export default function ProfileSettingsPage() {
     if (hasUnsavedChanges) {
       // Show confirmation dialog
       if (confirm("You have unsaved changes. Are you sure you want to switch tabs?")) {
-        setActiveTab(tabId)
-        setHasUnsavedChanges(false)
+        setIsTabLoading(true)
+        setTimeout(() => {
+          setActiveTab(tabId)
+          setHasUnsavedChanges(false)
+          setIsTabLoading(false)
+        }, 200)
       }
     } else {
-      setActiveTab(tabId)
+      setIsTabLoading(true)
+      setTimeout(() => {
+        setActiveTab(tabId)
+        setIsTabLoading(false)
+      }, 200)
     }
   }
 
@@ -189,14 +198,25 @@ export default function ProfileSettingsPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {/* Render the appropriate section based on activeTab */}
-                {activeTab === "personal-info" && <PersonalInfoSection />}
-                {activeTab === "security" && <SecuritySection />}
-                {activeTab === "notifications" && <NotificationSection />}
-                {activeTab === "privacy" && <PrivacySection />}
-                {activeTab === "documents" && <DocumentSection />}
-                {activeTab === "form-filling" && <FormFillingSection />}
-                {activeTab === "account" && <AccountSection />}
+                {isTabLoading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <div className="text-center space-y-4">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                      <p className="text-gray-600">Loading {tabs.find(tab => tab.id === activeTab)?.label}...</p>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    {/* Render the appropriate section based on activeTab */}
+                    {activeTab === "personal-info" && <PersonalInfoSection />}
+                    {activeTab === "security" && <SecuritySection />}
+                    {activeTab === "notifications" && <NotificationSection />}
+                    {activeTab === "privacy" && <PrivacySection />}
+                    {activeTab === "documents" && <DocumentSection />}
+                    {activeTab === "form-filling" && <FormFillingSection />}
+                    {activeTab === "account" && <AccountSection />}
+                  </>
+                )}
               </CardContent>
             </Card>
           </div>
