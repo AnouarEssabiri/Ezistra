@@ -44,6 +44,22 @@ export default function SecuritySection() {
     confirm: false,
   })
 
+  const getPasswordStrength = (password: string) => {
+    if (!password) return { score: 0, label: "Empty", color: "text-gray-400" }
+    
+    let score = 0
+    if (password.length >= 8) score += 1
+    if (/[a-z]/.test(password)) score += 1
+    if (/[A-Z]/.test(password)) score += 1
+    if (/[0-9]/.test(password)) score += 1
+    if (/[^A-Za-z0-9]/.test(password)) score += 1
+    
+    if (score <= 2) return { score, label: "Weak", color: "text-red-600" }
+    if (score <= 3) return { score, label: "Fair", color: "text-yellow-600" }
+    if (score <= 4) return { score, label: "Good", color: "text-blue-600" }
+    return { score, label: "Strong", color: "text-green-600" }
+  }
+
   const activeSessions: ActiveSession[] = [
     {
       id: "1",
@@ -179,9 +195,29 @@ export default function SecuritySection() {
                     )}
                   </Button>
                 </div>
-                <p className="text-xs text-gray-500 mt-1">
-                  Must be at least 8 characters long
-                </p>
+                <div className="mt-2 space-y-2">
+                  <p className="text-xs text-gray-500">
+                    Must be at least 8 characters long
+                  </p>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-xs text-gray-600">Strength:</span>
+                    <span className={`text-xs font-medium ${getPasswordStrength(passwordForm.newPassword).color}`}>
+                      {getPasswordStrength(passwordForm.newPassword).label}
+                    </span>
+                    <div className="flex space-x-1">
+                      {[1, 2, 3, 4, 5].map((level) => (
+                        <div
+                          key={level}
+                          className={`w-2 h-2 rounded-full ${
+                            level <= getPasswordStrength(passwordForm.newPassword).score
+                              ? getPasswordStrength(passwordForm.newPassword).color.replace('text-', 'bg-')
+                              : 'bg-gray-200'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <div>
