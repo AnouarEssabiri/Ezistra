@@ -27,6 +27,14 @@ export default function NotificationSection() {
     reminders: true,
   })
 
+  const [notificationSettings, setNotificationSettings] = useState({
+    soundEnabled: true,
+    vibrationEnabled: true,
+    quietHours: false,
+    quietStart: "22:00",
+    quietEnd: "08:00",
+  })
+
   const [reminderSettings, setReminderSettings] = useState({
     documentExpiry: "7_days",
     formDeadline: "3_days",
@@ -251,6 +259,85 @@ export default function NotificationSection() {
               onCheckedChange={() => handlePushToggle("reminders")}
             />
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Notification Sound Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <Bell className="h-5 w-5" />
+            <span>Notification Sound & Vibration</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <Label className="text-base font-medium">Sound Notifications</Label>
+              <p className="text-sm text-gray-600 mt-1">
+                Play sounds for push notifications
+              </p>
+            </div>
+            <Switch
+              checked={notificationSettings.soundEnabled}
+              onCheckedChange={(checked) => setNotificationSettings(prev => ({ ...prev, soundEnabled: checked }))}
+            />
+          </div>
+
+          <Separator />
+
+          <div className="flex items-center justify-between">
+            <div>
+              <Label className="text-base font-medium">Vibration</Label>
+              <p className="text-sm text-gray-600 mt-1">
+                Vibrate device for notifications
+              </p>
+            </div>
+            <Switch
+              checked={notificationSettings.vibrationEnabled}
+              onCheckedChange={(checked) => setNotificationSettings(prev => ({ ...prev, vibrationEnabled: checked }))}
+            />
+          </div>
+
+          <Separator />
+
+          <div className="flex items-center justify-between">
+            <div>
+              <Label className="text-base font-medium">Quiet Hours</Label>
+              <p className="text-sm text-gray-600 mt-1">
+                Reduce notification sounds during specified hours
+              </p>
+            </div>
+            <Switch
+              checked={notificationSettings.quietHours}
+              onCheckedChange={(checked) => setNotificationSettings(prev => ({ ...prev, quietHours: checked }))}
+            />
+          </div>
+
+          {notificationSettings.quietHours && (
+            <div className="grid grid-cols-2 gap-4 pt-2">
+              <div>
+                <Label htmlFor="quietStart">Start Time</Label>
+                <Input
+                  id="quietStart"
+                  type="time"
+                  value={notificationSettings.quietStart}
+                  onChange={(e) => setNotificationSettings(prev => ({ ...prev, quietStart: e.target.value }))}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="quietEnd">End Time</Label>
+                <Input
+                  id="quietEnd"
+                  type="time"
+                  value={notificationSettings.quietEnd}
+                  onChange={(e) => setNotificationSettings(prev => ({ ...prev, quietEnd: e.target.value }))}
+                  className="mt-1"
+                />
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
