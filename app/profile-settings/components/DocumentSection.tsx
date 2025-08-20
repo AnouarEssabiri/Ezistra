@@ -44,6 +44,17 @@ export default function DocumentSection() {
     "General",
   ])
 
+  const [fileTypeStats] = useState({
+    PDF: 12,
+    DOCX: 8,
+    XLSX: 5,
+    JPG: 15,
+    PNG: 7,
+    TXT: 3,
+    CSV: 4,
+    ZIP: 2,
+  })
+
   const handleSettingToggle = (key: string) => {
     setDocumentSettings(prev => ({
       ...prev,
@@ -316,6 +327,23 @@ export default function DocumentSection() {
           </CardTitle>
         </CardHeader>
         <CardContent>
+          <div className="mb-4">
+            <h4 className="font-medium text-gray-900 mb-3">File Type Distribution</h4>
+            <div className="flex flex-wrap gap-2">
+              {Object.entries(fileTypeStats).map(([format, count]) => (
+                <div
+                  key={format}
+                  className="flex items-center space-x-2 px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors"
+                >
+                  <span className="text-sm font-medium text-blue-900">{format}</span>
+                  <Badge variant="secondary" className="bg-blue-200 text-blue-800">
+                    {count}
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          </div>
+          
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
               { format: "PDF", icon: "📄", description: "Portable Document Format" },
