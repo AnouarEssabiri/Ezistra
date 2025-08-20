@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Camera, Edit3, Save, X, User } from "lucide-react"
 
@@ -64,7 +65,7 @@ export default function PersonalInfoSection() {
       setEditedInfo(prev => ({
         ...prev,
         [parent]: {
-          ...prev[parent as keyof PersonalInfo],
+          ...(prev[parent] as any),
           [child]: value,
         },
       }))
@@ -78,6 +79,23 @@ export default function PersonalInfoSection() {
 
   const getInitials = () => {
     return `${personalInfo.firstName.charAt(0)}${personalInfo.lastName.charAt(0)}`
+  }
+
+  const getProfileCompletion = () => {
+    const fields = [
+      personalInfo.firstName,
+      personalInfo.lastName,
+      personalInfo.email,
+      personalInfo.phone,
+      personalInfo.dateOfBirth,
+      personalInfo.address.street,
+      personalInfo.address.city,
+      personalInfo.address.state,
+      personalInfo.address.zipCode,
+      personalInfo.address.country,
+    ]
+    const filledFields = fields.filter(field => field && field.trim() !== '').length
+    return Math.round((filledFields / fields.length) * 100)
   }
 
   return (
@@ -108,7 +126,15 @@ export default function PersonalInfoSection() {
               </Button>
             </div>
             <div className="flex-1">
-              <h4 className="font-medium text-gray-900 mb-2">Profile Photo</h4>
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="font-medium text-gray-900">Profile Photo</h4>
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm text-gray-600">Profile Completion:</span>
+                  <Badge variant="outline" className="text-green-600 border-green-600">
+                    {getProfileCompletion()}%
+                  </Badge>
+                </div>
+              </div>
               <p className="text-sm text-gray-600 mb-3">
                 Upload a new profile photo. We recommend using a square image that's at least 200x200 pixels.
               </p>
