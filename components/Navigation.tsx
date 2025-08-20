@@ -20,10 +20,10 @@ export default function Navigation() {
       <div className="px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2">
+            <Link href="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
               <Shield className="h-8 w-8 text-blue-600" />
               <span className="text-2xl font-bold text-gray-900">FormGuard</span>
-            </div>
+            </Link>
             <nav className="hidden md:flex items-center space-x-6 ml-8">
               {navItems.map((item) => (
                 <Link key={item.href} href={item.href}>
@@ -42,6 +42,9 @@ export default function Navigation() {
             </nav>
           </div>
           <div className="flex items-center space-x-4">
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/dashboard">Get Started</Link>
+            </Button>
             <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
               U
             </div>

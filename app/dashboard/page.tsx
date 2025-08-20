@@ -22,6 +22,7 @@ import {
 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import Navigation from "@/components/Navigation"
 
 export default function DashboardPage() {
   const recentActivities = [
@@ -83,40 +84,7 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b sticky top-0 z-40">
-        <div className="px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <Shield className="h-8 w-8 text-blue-600" />
-                <span className="text-2xl font-bold text-gray-900">FormGuard</span>
-              </div>
-              <nav className="hidden md:flex items-center space-x-6 ml-8">
-                <Button variant="ghost" className="text-blue-600 bg-blue-50">
-                  Dashboard
-                </Button>
-                <Button variant="ghost">Documents</Button>
-                <Button variant="ghost">Form Filler</Button>
-                <Button variant="ghost">Profile Settings</Button>
-                <Button variant="ghost">Settings</Button>
-              </nav>
-            </div>
-
-            <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="icon">
-                <Bell className="h-5 w-5" />
-              </Button>
-              <Button variant="ghost" size="icon">
-                <Settings className="h-5 w-5" />
-              </Button>
-              <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                <span className="text-white text-sm font-medium">JD</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Navigation />
 
       <div className="p-6 max-w-7xl mx-auto">
         {/* Welcome Section */}
