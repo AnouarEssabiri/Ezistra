@@ -28,7 +28,7 @@ export default function SignupPage() {
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center space-x-2">
             <Shield className="h-8 w-8 text-blue-600" />
-            <span className="text-2xl font-bold text-gray-900">FormGuard</span>
+            <span className="text-2xl font-bold text-gray-900">Ezistra</span>
           </Link>
         </div>
 

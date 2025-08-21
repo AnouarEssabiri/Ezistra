@@ -108,7 +108,7 @@ export default function LandingPage() {
         <div className="container mx-auto text-center">
           <h2 className="text-4xl font-bold text-white mb-4">Ready to Simplify Your Form Filling?</h2>
           <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-            Join thousands of users who save hours every month with FormGuard
+            Join thousands of users who save hours every month with Ezistra
           </p>
           <Button size="lg" variant="secondary" className="text-lg px-8 py-3" asChild>
             <Link href="/signup">Start Your Free Trial</Link>
@@ -123,7 +123,7 @@ export default function LandingPage() {
             <div>
               <div className="flex items-center space-x-2 mb-4">
                 <Shield className="h-6 w-6 text-blue-400" />
-                <span className="text-xl font-bold">FormGuard</span>
+                <span className="text-xl font-bold">Ezistra</span>
               </div>
               <p className="text-gray-400">Secure document storage and smart form filling for everyone.</p>
             </div>
@@ -189,7 +189,7 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 FormGuard. All rights reserved.</p>
+            <p>&copy; 2024 Ezistra. All rights reserved.</p>
           </div>
         </div>
       </footer>

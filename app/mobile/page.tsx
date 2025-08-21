@@ -133,7 +133,7 @@ export default function MobilePage() {
             </Button>
             <div className="flex items-center space-x-2">
               <Shield className="h-6 w-6 text-blue-600" />
-              <span className="text-lg font-bold text-gray-900">FormGuard</span>
+              <span className="text-lg font-bold text-gray-900">Ezistra</span>
             </div>
           </div>
 

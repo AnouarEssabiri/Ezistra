@@ -53,7 +53,7 @@ export default function Navigation() {
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
               <Shield className="h-8 w-8 text-blue-600" />
-              <span className="text-2xl font-bold text-gray-900">FormGuard</span>
+              <span className="text-2xl font-bold text-gray-900">Ezistra</span>
             </Link>
             
             {/* Desktop Navigation */}
