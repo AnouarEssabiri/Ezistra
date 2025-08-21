@@ -40,6 +40,11 @@ import {
   EyeOff,
   Upload,
   Trash2,
+  Search,
+  Filter,
+  Database,
+  Link,
+  Unlink,
 } from "lucide-react"
 import { useState } from "react"
 import Navigation from "@/components/Navigation"
@@ -111,6 +116,27 @@ export default function FormFillerPage() {
 
   const [editedInfo, setEditedInfo] = useState(personalInfo)
 
+  // Field Mapping State
+  const [showFieldMappings, setShowFieldMappings] = useState(false)
+  const [fieldMappings, setFieldMappings] = useState([
+    { field: "First Name", mappedTo: "Personal Info - First Name", type: "text", isActive: true, confidence: 95, lastUsed: "2 hours ago" },
+    { field: "Last Name", mappedTo: "Personal Info - Last Name", type: "text", isActive: true, confidence: 98, lastUsed: "1 hour ago" },
+    { field: "Email", mappedTo: "Contact Info - Email", type: "email", isActive: true, confidence: 87, lastUsed: "3 hours ago" },
+    { field: "Phone", mappedTo: "Contact Info - Phone", type: "phone", isActive: true, confidence: 92, lastUsed: "5 hours ago" },
+    { field: "Address", mappedTo: "Personal Info - Address", type: "address", isActive: true, confidence: 78, lastUsed: "1 day ago" },
+    { field: "Birth Certificate", mappedTo: "Documents - Birth Certificate", type: "file", isActive: false, confidence: 65, lastUsed: "1 week ago" },
+    { field: "Transcript", mappedTo: "Documents - High School Transcript", type: "file", isActive: true, confidence: 89, lastUsed: "2 days ago" },
+  ])
+
+  const [newMapping, setNewMapping] = useState({
+    field: "",
+    mappedTo: "",
+    type: "text"
+  })
+
+  const [searchTerm, setSearchTerm] = useState("")
+  const [filterType, setFilterType] = useState("all")
+
   const savedForms = [
     {
       id: 1,
@@ -141,15 +167,7 @@ export default function FormFillerPage() {
     },
   ]
 
-  const fieldMappings = [
-    { field: "First Name", mappedTo: "Personal Info - First Name", type: "text" },
-    { field: "Last Name", mappedTo: "Personal Info - Last Name", type: "text" },
-    { field: "Email", mappedTo: "Contact Info - Email", type: "email" },
-    { field: "Phone", mappedTo: "Contact Info - Phone", type: "phone" },
-    { field: "Address", mappedTo: "Personal Info - Address", type: "address" },
-    { field: "Birth Certificate", mappedTo: "Documents - Birth Certificate", type: "file" },
-    { field: "Transcript", mappedTo: "Documents - High School Transcript", type: "file" },
-  ]
+
 
   const handleInputChange = (field: string, value: string) => {
     if (field.includes(".")) {
@@ -218,6 +236,61 @@ export default function FormFillerPage() {
     
     return Math.round((filledFields / totalFields) * 100)
   }
+
+  // Field Mapping Functions
+  const handleSaveMapping = () => {
+    if (newMapping.field && newMapping.mappedTo && newMapping.type) {
+      const mapping = {
+        ...newMapping,
+        isActive: true,
+        confidence: Math.floor(Math.random() * 30) + 70, // Random confidence 70-100
+        lastUsed: "Just now"
+      }
+      setFieldMappings(prev => [mapping, ...prev])
+      setNewMapping({ field: "", mappedTo: "", type: "text" })
+    }
+  }
+
+  const handleDeleteMapping = (index: number) => {
+    setFieldMappings(prev => prev.filter((_, i) => i !== index))
+  }
+
+  const toggleMappingStatus = (index: number) => {
+    setFieldMappings(prev => 
+      prev.map((mapping, i) => 
+        i === index 
+          ? { ...mapping, isActive: !mapping.isActive }
+          : mapping
+      )
+    )
+  }
+
+  const getMappingTypeIcon = (type: string) => {
+    switch (type) {
+      case "text": return <FileText className="h-4 w-4 text-blue-500" />
+      case "email": return <Calendar className="h-4 w-4 text-green-500" />
+      case "phone": return <MapPin className="h-4 w-4 text-purple-500" />
+      case "address": return <MapPin className="h-4 w-4 text-orange-500" />
+      case "file": return <FileText className="h-4 w-4 text-red-500" />
+      default: return <FileText className="h-4 w-4 text-gray-500" />
+    }
+  }
+
+  const getConfidenceColor = (confidence: number) => {
+    if (confidence >= 90) return "text-green-600 border-green-600"
+    if (confidence >= 80) return "text-blue-600 border-blue-600"
+    if (confidence >= 70) return "text-yellow-600 border-yellow-600"
+    return "text-red-600 border-red-600"
+  }
+
+  const filteredMappings = fieldMappings.filter(mapping => {
+    const matchesSearch = mapping.field.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         mapping.mappedTo.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesType = filterType === "all" || mapping.type === filterType
+    return matchesSearch && matchesType
+  })
+
+  const fieldTypes = Array.from(new Set(fieldMappings.map(m => m.type)))
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -901,46 +974,158 @@ export default function FormFillerPage() {
           </CardContent>
         </Card>
 
-        {/* Field Mappings Preview */}
+        {/* Field Mappings Management */}
         <Card>
           <CardHeader>
-            <CardTitle>Field Mappings</CardTitle>
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <MapPin className="h-5 w-5" />
+                <span>Field Mappings</span>
+              </div>
+              <Button
+                variant="outline"
+                onClick={() => setShowFieldMappings(!showFieldMappings)}
+                className="flex items-center space-x-2"
+              >
+                {showFieldMappings ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                <span>{showFieldMappings ? 'Hide' : 'Show'} Mappings</span>
+              </Button>
+            </CardTitle>
             <CardDescription>How your stored data maps to form fields</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {fieldMappings.map((mapping, index) => (
-                <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <div className="flex-shrink-0">
-                      {mapping.type === "file" ? (
-                        <FileText className="h-5 w-5 text-blue-500" />
-                      ) : mapping.type === "address" ? (
-                        <MapPin className="h-5 w-5 text-green-500" />
-                      ) : mapping.type === "email" ? (
-                        <Calendar className="h-5 w-5 text-purple-500" />
-                      ) : (
-                        <User className="h-5 w-5 text-gray-500" />
-                      )}
-                    </div>
-                    <div>
-                      <p className="font-medium text-sm">{mapping.field}</p>
-                      <p className="text-xs text-gray-600">Maps to: {mapping.mappedTo}</p>
+            {showFieldMappings ? (
+              <div className="space-y-6">
+                {/* Add New Mapping */}
+                <div className="p-4 border rounded-lg bg-gray-50">
+                  <h4 className="font-medium text-gray-900 mb-3">Create New Field Mapping</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <Input
+                      placeholder="Form field name"
+                      value={newMapping.field}
+                      onChange={(e) => setNewMapping(prev => ({ ...prev, field: e.target.value }))}
+                    />
+                    <Input
+                      placeholder="Maps to data field"
+                      value={newMapping.mappedTo}
+                      onChange={(e) => setNewMapping(prev => ({ ...prev, mappedTo: e.target.value }))}
+                    />
+                    <Select
+                      value={newMapping.type}
+                      onValueChange={(value) => setNewMapping(prev => ({ ...prev, type: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="text">Text</SelectItem>
+                        <SelectItem value="email">Email</SelectItem>
+                        <SelectItem value="phone">Phone</SelectItem>
+                        <SelectItem value="address">Address</SelectItem>
+                        <SelectItem value="file">File</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button onClick={handleSaveMapping} size="sm" className="mt-3">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Mapping
+                  </Button>
+                </div>
+
+                {/* Search and Filter */}
+                <div className="flex items-center space-x-4">
+                  <div className="flex-1">
+                    <div className="relative">
+                      <Search className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                      <Input
+                        placeholder="Search mappings..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-10"
+                      />
                     </div>
                   </div>
-                  <Badge variant="secondary" className="text-xs">
-                    {mapping.type}
-                  </Badge>
+                  <Select value={filterType} onValueChange={setFilterType}>
+                    <SelectTrigger className="w-40">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Types</SelectItem>
+                      {fieldTypes.map(type => (
+                        <SelectItem key={type} value={type}>{type}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-              ))}
-            </div>
 
-            <div className="mt-6 pt-4 border-t">
-              <Button variant="outline" className="w-full bg-transparent">
-                <Settings className="h-4 w-4 mr-2" />
-                Configure Field Mappings
-              </Button>
-            </div>
+                {/* Mappings List */}
+                <div className="space-y-3">
+                  {filteredMappings.map((mapping, index) => (
+                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        {getMappingTypeIcon(mapping.type)}
+                        <div>
+                          <div className="flex items-center space-x-2">
+                            <span className="font-medium text-sm">{mapping.field}</span>
+                            <span className="text-gray-400">→</span>
+                            <span className="text-blue-600 text-sm">{mapping.mappedTo}</span>
+                          </div>
+                          <div className="flex items-center space-x-4 mt-1 text-xs text-gray-500">
+                            <span className="flex items-center space-x-1">
+                              <Badge variant="outline" className={`text-xs ${getConfidenceColor(mapping.confidence)}`}>
+                                {mapping.confidence}% confidence
+                              </Badge>
+                            </span>
+                            <span>Last used: {mapping.lastUsed}</span>
+                            <Badge variant="outline" className="text-xs">
+                              {mapping.type}
+                            </Badge>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Switch
+                          checked={mapping.isActive}
+                          onCheckedChange={() => toggleMappingStatus(index)}
+                        />
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDeleteMapping(index)}
+                          className="text-red-600 hover:text-red-700"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {/* Preview of mappings */}
+                {fieldMappings.slice(0, 3).map((mapping, index) => (
+                  <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div className="flex-shrink-0">
+                        {getMappingTypeIcon(mapping.type)}
+                      </div>
+                      <div>
+                        <p className="font-medium text-sm">{mapping.field}</p>
+                        <p className="text-xs text-gray-600">Maps to: {mapping.mappedTo}</p>
+                      </div>
+                    </div>
+                    <Badge variant="secondary" className="text-xs">
+                      {mapping.type}
+                    </Badge>
+                  </div>
+                ))}
+                
+                <div className="text-center py-4 text-gray-500">
+                  <p className="text-sm">Click "Show Mappings" to manage field mappings</p>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
