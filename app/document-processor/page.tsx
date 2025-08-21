@@ -33,7 +33,7 @@ import {
   HardDrive,
   Merge,
   FileDown,
-  Compress,
+  Minimize2,
   Maximize2,
   RotateCcw,
 } from "lucide-react"
@@ -96,7 +96,7 @@ export default function DocumentProcessorPage() {
       id: 'compress',
       label: 'Compress Documents',
       description: 'Reduce file size while maintaining quality',
-      icon: <Compress className="h-5 w-5" />,
+      icon: <Minimize2 className="h-5 w-5" />,
       checked: false
     }
   ])
