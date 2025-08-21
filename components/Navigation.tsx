@@ -19,6 +19,7 @@ export default function Navigation() {
     { href: "/dashboard", label: "Dashboard" },
     { href: "/documents", label: "Documents" },
     { href: "/form-filler", label: "Form Filler" },
+    { href: "/document-processor", label: "Document Processor" },
     { href: "/profile-settings", label: "Profile Settings" },
   ]
 
