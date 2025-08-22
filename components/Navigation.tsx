@@ -6,14 +6,17 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useState } from "react"
 import { useMobile } from "@/hooks/use-mobile"
+import { useAuth } from "@/components/AuthContext"
+
 
 export default function Navigation() {
-  const pathname = usePathname()
-  const router = useRouter()
-  const [isNavigating, setIsNavigating] = useState(false)
-  const [navigatingTo, setNavigatingTo] = useState("")
-  const { isMobile } = useMobile()
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const pathname = usePathname();
+  const router = useRouter();
+  const [isNavigating, setIsNavigating] = useState(false);
+  const [navigatingTo, setNavigatingTo] = useState("");
+  const { isMobile } = useMobile();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { isAuthenticated } = useAuth();
 
   const navItems = [
     { href: "/dashboard", label: "Dashboard" },
@@ -21,30 +24,33 @@ export default function Navigation() {
     { href: "/form-filler", label: "Form Filler" },
     { href: "/document-processor", label: "Document Processor" },
     { href: "/profile-settings", label: "Profile Settings" },
-  ]
+  ];
 
   // Redirect to mobile page if user is on mobile
   if (isMobile && pathname !== "/mobile") {
-    router.push("/mobile")
-    return null
+    router.push("/mobile");
+    return null;
+  }
+
+  // Hide navigation if not authenticated
+  if (!isAuthenticated) {
+    return null;
   }
 
   const handleNavigation = (href: string, label: string) => {
-    if (href === pathname) return
-    
-    setIsNavigating(true)
-    setNavigatingTo(label)
-    setIsMobileMenuOpen(false) // Close mobile menu when navigating
-    
+    if (href === pathname) return;
+    setIsNavigating(true);
+    setNavigatingTo(label);
+    setIsMobileMenuOpen(false); // Close mobile menu when navigating
     // Simulate navigation delay for better UX
     setTimeout(() => {
-      router.push(href)
-    }, 300)
-  }
+      router.push(href);
+    }, 300);
+  };
 
   const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen)
-  }
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
 
   return (
     <>
@@ -55,7 +61,6 @@ export default function Navigation() {
               <Shield className="h-8 w-8 text-blue-600" />
               <span className="text-2xl font-bold text-gray-900">Ezistra</span>
             </Link>
-            
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center space-x-6 ml-8">
               {navItems.map((item) => (
@@ -77,12 +82,10 @@ export default function Navigation() {
                 </Button>
               ))}
             </nav>
-
             <div className="flex items-center space-x-4">
               <Button variant="outline" size="sm" asChild className="hidden md:inline-flex">
                 <Link href="/dashboard">Get Started</Link>
               </Button>
-              
               {/* Mobile Menu Button */}
               <Button
                 variant="ghost"
@@ -96,13 +99,11 @@ export default function Navigation() {
                   <Menu className="h-5 w-5" />
                 )}
               </Button>
-
               <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
                 U
               </div>
             </div>
           </div>
-
           {/* Mobile Navigation Menu */}
           {isMobileMenuOpen && (
             <div className="md:hidden mt-4 pb-4 border-t pt-4">
@@ -133,7 +134,6 @@ export default function Navigation() {
           )}
         </div>
       </header>
-
       {/* Navigation Loading Overlay */}
       {isNavigating && (
         <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center">
@@ -149,5 +149,5 @@ export default function Navigation() {
         </div>
       )}
     </>
-  )
+  );
 }

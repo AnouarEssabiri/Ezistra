@@ -8,9 +8,27 @@ import { Separator } from "@/components/ui/separator"
 import { Shield, Eye, EyeOff } from "lucide-react"
 import Link from "next/link"
 import { useState } from "react"
-
+import { useAuth } from "@/components/AuthContext"
+import { useRouter } from "next/navigation"
 export default function LoginPage() {
-  const [showPassword, setShowPassword] = useState(false)
+  const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const { login } = useAuth();
+  const router = useRouter();
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Accept both 'demo' and 'demo@demo.com' for demo
+    const username = email.trim().toLowerCase();
+    if (login(username === "demo@demo.com" ? "demo" : username, password)) {
+      setError("");
+      router.push("/dashboard");
+    } else {
+      setError("Invalid credentials. Use demo / password123");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
@@ -29,10 +47,18 @@ export default function LoginPage() {
             <CardDescription>Sign in to your account to continue</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <form className="space-y-4">
+            <form className="space-y-4" onSubmit={handleSubmit}>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" placeholder="Enter your email" className="h-11" />
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="Enter your email"
+                  className="h-11"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  autoComplete="username"
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
@@ -42,6 +68,9 @@ export default function LoginPage() {
                     type={showPassword ? "text" : "password"}
                     placeholder="Enter your password"
                     className="h-11 pr-10"
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    autoComplete="current-password"
                   />
                   <Button
                     type="button"
@@ -58,6 +87,10 @@ export default function LoginPage() {
                   </Button>
                 </div>
               </div>
+
+              {error && (
+                <div className="text-red-600 text-sm text-center">{error}</div>
+              )}
 
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">

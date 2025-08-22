@@ -317,59 +317,59 @@ export default function FormFillerPage() {
               </Badge>
             </Button>
 
-            <Dialog open={newFormDialogOpen} onOpenChange={setNewFormDialogOpen}>
-              <DialogTrigger asChild>
-                <Button className="flex items-center space-x-2">
-                  <Plus className="h-4 w-4" />
-                  <span>New Form</span>
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-md">
-                <DialogHeader>
-                  <DialogTitle>Add New Form</DialogTitle>
-                  <DialogDescription>Enter the URL of the form you want to fill automatically</DialogDescription>
-                </DialogHeader>
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="form-url">Form URL</Label>
-                    <Input id="form-url" placeholder="https://example.com/form" type="url" />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="form-name">Form Name</Label>
-                    <Input id="form-name" placeholder="Enter a name for this form" />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="form-category">Category</Label>
-                    <Select>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="education">Education</SelectItem>
-                        <SelectItem value="competition">Competition</SelectItem>
-                        <SelectItem value="recreation">Recreation</SelectItem>
-                        <SelectItem value="employment">Employment</SelectItem>
-                        <SelectItem value="other">Other</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="form-description">Description (optional)</Label>
-                    <Textarea id="form-description" placeholder="Add notes about this form..." />
-                  </div>
+          <Dialog open={newFormDialogOpen} onOpenChange={setNewFormDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="flex items-center space-x-2">
+                <Plus className="h-4 w-4" />
+                <span>New Form</span>
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Add New Form</DialogTitle>
+                <DialogDescription>Enter the URL of the form you want to fill automatically</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="form-url">Form URL</Label>
+                  <Input id="form-url" placeholder="https://example.com/form" type="url" />
                 </div>
-                <DialogFooter>
-                  <Button variant="outline" onClick={() => setNewFormDialogOpen(false)}>
-                    Cancel
-                  </Button>
-                  <Button onClick={() => setNewFormDialogOpen(false)}>Add Form</Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </div>
+
+                <div>
+                  <Label htmlFor="form-name">Form Name</Label>
+                  <Input id="form-name" placeholder="Enter a name for this form" />
+                </div>
+
+                <div>
+                  <Label htmlFor="form-category">Category</Label>
+                  <Select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="education">Education</SelectItem>
+                      <SelectItem value="competition">Competition</SelectItem>
+                      <SelectItem value="recreation">Recreation</SelectItem>
+                      <SelectItem value="employment">Employment</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="form-description">Description (optional)</Label>
+                  <Textarea id="form-description" placeholder="Add notes about this form..." />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setNewFormDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={() => setNewFormDialogOpen(false)}>Add Form</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
         </div>
 
         {/* Personal Information Dialog */}
@@ -1102,29 +1102,29 @@ export default function FormFillerPage() {
                 </div>
               </div>
             ) : (
-              <div className="space-y-4">
+            <div className="space-y-4">
                 {/* Preview of mappings */}
                 {fieldMappings.slice(0, 3).map((mapping, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <div className="flex items-center space-x-3">
-                      <div className="flex-shrink-0">
+                <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <div className="flex-shrink-0">
                         {getMappingTypeIcon(mapping.type)}
-                      </div>
-                      <div>
-                        <p className="font-medium text-sm">{mapping.field}</p>
-                        <p className="text-xs text-gray-600">Maps to: {mapping.mappedTo}</p>
-                      </div>
                     </div>
-                    <Badge variant="secondary" className="text-xs">
-                      {mapping.type}
-                    </Badge>
+                    <div>
+                      <p className="font-medium text-sm">{mapping.field}</p>
+                      <p className="text-xs text-gray-600">Maps to: {mapping.mappedTo}</p>
+                    </div>
                   </div>
-                ))}
+                  <Badge variant="secondary" className="text-xs">
+                    {mapping.type}
+                  </Badge>
+                </div>
+              ))}
                 
                 <div className="text-center py-4 text-gray-500">
                   <p className="text-sm">Click "Show Mappings" to manage field mappings</p>
-                </div>
-              </div>
+            </div>
+            </div>
             )}
           </CardContent>
         </Card>
