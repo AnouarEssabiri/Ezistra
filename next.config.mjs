@@ -9,6 +9,15 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  // API proxy to NestJS backend
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: 'http://localhost:3001/api/:path*',
+      },
+    ];
+  },
 }
 
 export default nextConfig
