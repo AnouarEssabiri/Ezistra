@@ -1,3 +1,4 @@
+// Dummy update: This comment was added for a test commit.
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
@@ -9,10 +10,10 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
 
   // Enable CORS
-  const allowedOrigins = configService.get('ALLOWED_ORIGINS')?.split(',') || [
+  const allowedOrigins: string[] = (configService.get('ALLOWED_ORIGINS')?.split(',') || [
     'http://localhost:3000',
     'http://localhost:3001',
-  ];
+  ]) as string[];
 
   app.enableCors({
     origin: allowedOrigins,
@@ -37,9 +38,8 @@ async function bootstrap() {
   // Set global prefix
   app.setGlobalPrefix('api');
 
-  const port = configService.get('PORT') || 3001;
+  const port: number = configService.get('PORT') || 3001;
   await app.listen(port);
-  
   console.log(`🚀 Backend server running on http://localhost:${port}`);
   console.log(`📚 API documentation available at http://localhost:${port}/api`);
 }
