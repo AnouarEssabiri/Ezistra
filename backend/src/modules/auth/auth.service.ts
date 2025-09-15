@@ -6,7 +6,11 @@ import {
 } from '@nestjs/common';
 import { SupabaseService } from '../supabase/supabase.service';
 import { RedisService } from '../redis/redis.service';
-import { SignupDto, LoginDto, AuthResponseDto } from '../../common/dto/auth.dto';
+import {
+  SignupDto,
+  LoginDto,
+  AuthResponseDto,
+} from '../../common/dto/auth.dto';
 
 @Injectable()
 export class AuthService {
@@ -47,7 +51,9 @@ export class AuthService {
       await this.redisService.setAccessToken(
         user.id,
         session.access_token,
-        session.expires_at ? session.expires_at - Math.floor(Date.now() / 1000) : 3600,
+        session.expires_at
+          ? session.expires_at - Math.floor(Date.now() / 1000)
+          : 3600,
       );
 
       return {
@@ -102,7 +108,9 @@ export class AuthService {
       await this.redisService.setAccessToken(
         user.id,
         session.access_token,
-        session.expires_at ? session.expires_at - Math.floor(Date.now() / 1000) : 3600,
+        session.expires_at
+          ? session.expires_at - Math.floor(Date.now() / 1000)
+          : 3600,
       );
 
       return {
@@ -129,7 +137,7 @@ export class AuthService {
     try {
       // Get session from Redis
       const session = await this.redisService.getSession(userId);
-      
+
       if (session?.access_token) {
         // Sign out from Supabase
         await this.supabaseService.client.auth.signOut();
@@ -173,7 +181,9 @@ export class AuthService {
       await this.redisService.setAccessToken(
         user.id,
         session.access_token,
-        session.expires_at ? session.expires_at - Math.floor(Date.now() / 1000) : 3600,
+        session.expires_at
+          ? session.expires_at - Math.floor(Date.now() / 1000)
+          : 3600,
       );
 
       return {

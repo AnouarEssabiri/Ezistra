@@ -30,7 +30,9 @@ export class SupabaseService {
 
       return user;
     } catch (error) {
-      throw new Error(`JWT verification failed: ${error.message}`);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      throw new Error(`JWT verification failed: ${errorMessage}`);
     }
   }
 

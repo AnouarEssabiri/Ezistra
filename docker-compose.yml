@@ -1,0 +1,53 @@
+    
+services:
+  postgres:
+    image: postgres:15
+    container_name: ezistra_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DATABASE: ${DATABASE_NAME}
+    ports:
+      - "${POSTGRES_PORT}:6923"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+  
+  # backend service 
+  backend:
+    build: ./backend
+    container_name: ezistra_backend
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "${BACKEND_PORT}:5454"
+    depends_on:
+      - postgres
+  
+  # frontend service 
+  frontend: 
+    build: .
+    container_name: ezistra_frontend
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "${FRONTEND_PORT}:1800"
+    depends_on:
+      - backend
+    
+  microservice:
+    build: ./microservices
+    container_name: ezistra_microservice
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "${MICROSERVICE_PORT}:3000"
+    depends_on:
+      - backend
+
+
+volumes:
+  postgres_data:
