@@ -1,14 +1,8 @@
+import { DocumentInfo } from "@/lib/types";
 import { DB } from "./index.table";
 
 export class Documents {
-  async add(document: {
-    studentId: string;
-    type: string; // e.g. "Demande manuscrite", "BAC", "CIN"
-    fileName: string;
-    fileSize: number;
-    fileType: string; // application/pdf
-    fileContent: Blob ;
-  }) {
+  async add(document: DocumentInfo) {
     try{
         const db = await DB();
         const tx = db.transaction("documents","readwrite");
@@ -16,7 +10,7 @@ export class Documents {
         await tx.done;
     }
     catch(error){
-        console.error("Failed to add document:", error)
+        console.error("Failed to add document info:", error)
     }
   }
 }
