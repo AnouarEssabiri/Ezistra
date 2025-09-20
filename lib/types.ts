@@ -6,6 +6,7 @@ export type BacLevel = "bac+2" | "bac+3" | "bac+5";
 // 1️⃣ Personal Info
 export interface PersonalInfo {
   id: string;
+  email: string;
   cne: string;
   cin: string;
   firstName: string;
