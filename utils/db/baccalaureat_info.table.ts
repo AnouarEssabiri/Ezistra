@@ -1,73 +1,37 @@
 import { BaccalaureatInfo } from "@/lib/types";
-import { DB } from "./index.table";
-export class Baccalaureat{
-    async add(baccalaureat: BaccalaureatInfo): Promise<number | undefined> {
-        try {
-            const db = await DB();
-            const tx = db.transaction("baccalaureat", "readwrite");
-            const id = await tx.store.add(baccalaureat);
-            await tx.done;
-            return typeof id === "number" ? id : undefined;
-        } catch (error) {
-            console.error("Failed to add baccalaureat info: ", error);
-            return undefined;
-        }
-    }
+import { BaseRepository } from "./base.repository";
 
-    async getAll(): Promise<BaccalaureatInfo[]> {
-        try {
-            const db = await DB();
-            const tx = db.transaction("baccalaureat", "readonly");
-            const result = await tx.store.getAll();
-            await tx.done;
-            return result;
-        } catch (error) {
-            console.error("Failed to get all baccalaureat info: ", error);
-            return [];
-        }
-    }
+/**
+ * Baccalaureat repository with extended methods
+ */
+export class Baccalaureat extends BaseRepository<BaccalaureatInfo> {
+  storeName = "baccalaureat";
 
-    async getById(id: number): Promise<BaccalaureatInfo | undefined> {
-        try {
-            const db = await DB();
-            const tx = db.transaction("baccalaureat", "readonly");
-            const result: BaccalaureatInfo | undefined = await tx.store.get(id);
-            await tx.done;
-            return result;
-        } catch (error) {
-            console.error("Failed to get baccalaureat info: ", error);
-            return undefined;
-        }
-    }
+  /**
+   * Get baccalaureat records by student ID
+   */
+  async getByStudentId(studentId: string): Promise<BaccalaureatInfo[]> {
+    return this.findByIndex("studentId", studentId);
+  }
 
-    async update(id: number, updated: Partial<BaccalaureatInfo>): Promise<boolean> {
-        try {
-            const db = await DB();
-            const tx = db.transaction("baccalaureat", "readwrite");
-            const exist: BaccalaureatInfo | undefined = await tx.store.get(id);
-            if (exist) {
-                await tx.store.put({ ...exist, ...updated });
-                await tx.done;
-                return true;
-            }
-            await tx.done;
-            return false;
-        } catch (error) {
-            console.error("Failed to update baccalaureat info: ", error);
-            return false;
-        }
-    }
+  /**
+   * Get records by year
+   */
+  async getByYear(year: string): Promise<BaccalaureatInfo[]> {
+    return this.findByIndex("year", year);
+  }
 
-    async delete(id: number): Promise<boolean> {
-        try {
-            const db = await DB();
-            const tx = db.transaction("baccalaureat", "readwrite");
-            await tx.store.delete(id);
-            await tx.done;
-            return true;
-        } catch (error) {
-            console.error("Failed to delete baccalaureat info: ", error);
-            return false;
-        }
-    }
+  /**
+   * Get records by type (scientifique, lettres, etc.)
+   */
+  async getByType(bacType: string): Promise<BaccalaureatInfo[]> {
+    return this.filter(rec => rec.bacType === bacType);
+  }
+
+  /**
+   * Get high performers (grade >= 16)
+   */
+  async getHighPerformers(): Promise<BaccalaureatInfo[]> {
+    return this.filter(rec => rec.grade >= 16);
+  }
 }

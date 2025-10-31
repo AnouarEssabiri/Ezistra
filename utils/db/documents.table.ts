@@ -1,74 +1,42 @@
 import { DocumentInfo } from "@/lib/types";
-import { DB } from "./index.table";
+import { BaseRepository } from "./base.repository";
 
-export class Documents {
-  async add(document: DocumentInfo): Promise<number | undefined> {
-    try {
-      const db = await DB();
-      const tx = db.transaction("documents", "readwrite");
-      const id = await tx.store.add(document);
-      await tx.done;
-      return typeof id === "number" ? id : undefined;
-    } catch (error) {
-      console.error("Failed to add document info:", error);
-      return undefined;
-    }
+/**
+ * Documents repository with extended methods
+ */
+export class Documents extends BaseRepository<DocumentInfo> {
+  storeName = "documents";
+
+  /**
+   * Get all documents for a specific student
+   */
+  async getByStudentId(studentId: string): Promise<DocumentInfo[]> {
+    return this.findByIndex("studentId", studentId);
   }
 
-  async getAll(): Promise<DocumentInfo[]> {
-    try {
-      const db = await DB();
-      const tx = db.transaction("documents", "readonly");
-      const result = await tx.store.getAll();
-      await tx.done;
-      return result;
-    } catch (error) {
-      console.error("Failed to get all documents:", error);
-      return [];
-    }
+  /**
+   * Get documents by type
+   */
+  async getByType(type: string): Promise<DocumentInfo[]> {
+    return this.findByIndex("type", type);
   }
 
-  async getById(id: number): Promise<DocumentInfo | undefined> {
-    try {
-      const db = await DB();
-      const tx = db.transaction("documents", "readonly");
-      const result: DocumentInfo | undefined = await tx.store.get(id);
-      await tx.done;
-      return result;
-    } catch (error) {
-      console.error("Failed to get document info:", error);
-      return undefined;
-    }
+  /**
+   * Get documents by student ID and type
+   */
+  async getByStudentIdAndType(studentId: string, type: string): Promise<DocumentInfo[]> {
+    return this.filter(
+      doc => doc.studentId === studentId && doc.type === type
+    );
   }
 
-  async update(id: number, updated: Partial<DocumentInfo>): Promise<boolean> {
-    try {
-      const db = await DB();
-      const tx = db.transaction("documents", "readwrite");
-      const exist: DocumentInfo | undefined = await tx.store.get(id);
-      if (exist) {
-        await tx.store.put({ ...exist, ...updated });
-        await tx.done;
-        return true;
-      }
-      await tx.done;
-      return false;
-    } catch (error) {
-      console.error("Failed to update document info:", error);
-      return false;
-    }
-  }
-
-  async delete(id: number): Promise<boolean> {
-    try {
-      const db = await DB();
-      const tx = db.transaction("documents", "readwrite");
-      await tx.store.delete(id);
-      await tx.done;
-      return true;
-    } catch (error) {
-      console.error("Failed to delete document info:", error);
-      return false;
-    }
+  /**
+   * Search documents by file name
+   */
+  async searchByFileName(fileName: string): Promise<DocumentInfo[]> {
+    const searchTerm = fileName.toLowerCase();
+    return this.filter(
+      doc => doc.fileName.toLowerCase().includes(searchTerm)
+    );
   }
 }

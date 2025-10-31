@@ -1,75 +1,33 @@
 import { HigherEducationInfo } from "@/lib/types";
-import { DB } from "./index.table";
+import { BaseRepository } from "./base.repository";
 
-export class HigherEducation {
-  async add(higherEducation: HigherEducationInfo) {
-    try {
-      const db = await DB();
-      const tx = db.transaction("higher_education", "readwrite");
-      await tx.store.add(higherEducation);
-      await tx.done;
-    } catch (error) {
-      console.error("Failed to add higher education info: ", error);
-    }
+/**
+ * Higher Education repository with extended methods
+ */
+export class HigherEducation extends BaseRepository<HigherEducationInfo> {
+  storeName = "higher_education";
+
+  /**
+   * Get higher education records by student ID
+   */
+  async getByStudentId(studentId: string): Promise<HigherEducationInfo[]> {
+    return this.findByIndex("studentId", studentId);
   }
 
-  async getAll(): Promise<HigherEducationInfo[]> {
-    try {
-      const db = await DB();
-      const tx = db.transaction("higher_education", "readonly");
-      const result = await tx.store.getAll();
-      await tx.done;
-      return result;
-    } catch (error) {
-      console.error("Failed to get all higher education info: ", error);
-      return [];
-    }
+  /**
+   * Get higher education records by level (bac+2, bac+3, bac+5)
+   */
+  async getByLevel(level: string): Promise<HigherEducationInfo[]> {
+    return this.findByIndex("level", level);
   }
 
-  async getById(id: number): Promise<HigherEducationInfo | undefined> {
-    try {
-      const db = await DB();
-      const tx = db.transaction("higher_education", "readonly");
-      const result: HigherEducationInfo | undefined = await tx.store.get(id);
-      await tx.done;
-      return result;
-    } catch (error) {
-      console.error("Failed to get higher education info: ", error);
-      return undefined;
-    }
-  }
-
-  async update(id: number, updated: Partial<HigherEducationInfo>): Promise<boolean> {
-    try {
-      const db = await DB();
-      const tx = db.transaction("higher_education", "readwrite");
-      const exist: HigherEducationInfo | undefined = await tx.store.get(id);
-      if (exist) {
-        await tx.store.put({ ...exist, ...updated });
-        await tx.done;
-        return true;
-      }
-      await tx.done;
-      return false;
-    } catch (error) {
-      console.error("Failed to update higher education info: ", error);
-      return false;
-    }
-  }
-
-  async delete(id: number): Promise<boolean> {
-    try {
-      const db = await DB();
-      const tx = db.transaction("higher_education", "readwrite");
-      await tx.store.delete(id);
-      await tx.done;
-      return true;
-    } catch (error) {
-      console.error("Failed to delete higher education info: ", error);
-      return false;
-    }
+  /**
+   * Get records by student and level
+   */
+  async getByStudentIdAndLevel(studentId: string, level: string): Promise<HigherEducationInfo[]> {
+    return this.filter(
+      rec => rec.studentId === studentId && rec.level === level
+    );
   }
 }
-
-
 

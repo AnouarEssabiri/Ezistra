@@ -1,53 +1,35 @@
 import { UniversityInfo } from "@/lib/types";
-import { DB } from "./index.table";
+import { BaseRepository } from "./base.repository";
 
-export class University {
-  async add(university: UniversityInfo) {
-    try {
-      const db = await DB();
-      const tx = db.transaction("university", "readwrite");
-      await tx.store.add(university);
-      await tx.done;
-    } catch (error) {
-      console.error("Failed to add university info:", error);
-    }
+/**
+ * University repository with extended methods
+ */
+export class University extends BaseRepository<UniversityInfo> {
+  storeName = "university";
+
+  /**
+   * Get university info by student ID
+   */
+  async getByStudentId(studentId: string): Promise<UniversityInfo[]> {
+    return this.findByIndex("studentId", studentId);
   }
 
-  async getAll(): Promise<UniversityInfo[]> {
-    const db = await DB();
-    const tx = db.transaction("university", "readonly");
-    return await tx.store.getAll();
+  /**
+   * Get university info by academic year
+   */
+  async getByAcademicYear(academicYear: string): Promise<UniversityInfo[]> {
+    return this.findByIndex("academicYear", academicYear);
   }
 
-  async getById(id: number): Promise<UniversityInfo | undefined> {
-    const db = await DB();
-    const tx = db.transaction("university", "readonly");
-    return await tx.store.get(id);
-  }
-
-  async update(id: number, updated: Partial<UniversityInfo>) {
-    try {
-      const db = await DB();
-      const tx = db.transaction("university", "readwrite");
-      const existing = await tx.store.get(id);
-      if (existing) {
-        const merged = { ...existing, ...updated };
-        await tx.store.put(merged);
-      }
-      await tx.done;
-    } catch (error) {
-      console.error("Failed to update university info: ", error);
-    }
-  }
-
-  async delete(id: number) {
-    try {
-      const db = await DB();
-      const tx = db.transaction("university", "readwrite");
-      await tx.store.delete(id);
-      await tx.done;
-    } catch (error) {
-      console.error("Failed to delete university info:", error);
-    }
+  /**
+   * Get current academic year info for a student
+   */
+  async getCurrentYearInfo(studentId: string): Promise<UniversityInfo | undefined> {
+    const currentYear = new Date().getFullYear();
+    const academicYear = `${currentYear}/${currentYear + 1}`;
+    const results = await this.filter(
+      info => info.studentId === studentId && info.academicYear === academicYear
+    );
+    return results[0];
   }
 }
