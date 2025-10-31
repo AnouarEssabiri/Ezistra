@@ -1,5 +1,6 @@
 "use client"
 
+import { Dashboard } from "./dashboard"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -87,9 +88,16 @@ export default function DashboardPage() {
       <Navigation />
 
       <div className="p-6 max-w-7xl mx-auto">
-        {/* Welcome Section */}
+        {/* Database Dashboard */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome back, John!</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-4">Dashboard</h1>
+          <Dashboard />
+        </div>
+
+        {/* Original Dashboard Section */}
+        <hr className="my-8" />
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Welcome back, John!</h2>
           <p className="text-gray-600">Here's what's happening with your documents and forms.</p>
         </div>
 

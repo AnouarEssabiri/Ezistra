@@ -719,7 +719,6 @@ export default function FormFillingSection() {
                       <Switch
                         checked={mapping.isActive}
                         onCheckedChange={() => toggleMappingStatus(mapping.id)}
-                        size="sm"
                       />
                       <Button
                         variant="outline"
@@ -833,7 +832,6 @@ export default function FormFillingSection() {
                   <Switch
                     checked={rule.isActive}
                     onCheckedChange={() => toggleRuleStatus(rule.id)}
-                    size="sm"
                   />
                   <Button
                     variant="outline"
