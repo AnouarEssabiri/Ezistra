@@ -56,9 +56,6 @@ export default function FormFillerPage() {
   const [personalInfoDialogOpen, setPersonalInfoDialogOpen] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [successMessage, setSuccessMessage] = useState("")
-  const [errorMessage, setErrorMessage] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const currentYear = "2025/2026"
 
   // Personal Info State
@@ -190,7 +187,6 @@ export default function FormFillerPage() {
   const [documents, setDocuments] = useState<DocumentInfo[]>([])
 
   const handleInputChange = (section: string, field: string, value: any) => {
-    setHasUnsavedChanges(true)
     switch(section) {
       case "personal":
         setPersonalInfo(prev => ({ ...prev, [field]: value }))
@@ -222,255 +218,84 @@ export default function FormFillerPage() {
     }
   }
 
-  const { execute: dbExecute, isReady: isDatabaseReady, error: dbError } = useDatabaseOperation()
-
-  const validateForm = () => {
-    // Required fields validation
-    const requiredFields = {
-      personal: ['cne', 'cin', 'firstName', 'lastName', 'birthDate', 'birthPlace', 'birthProvince'],
-      university: ['filiere'],
-      studentAddress: ['address', 'commune', 'province', 'email1', 'phone'],
-      bac: ['year', 'grade', 'bacType', 'institution', 'serie']
-    }
-
-    // Check personal info
-    for (const field of requiredFields.personal) {
-      if (!personalInfo[field as keyof typeof personalInfo]) {
-        throw new Error(`Le champ ${field} est obligatoire dans les informations personnelles`)
-      }
-    }
-
-    // Check university info
-    for (const field of requiredFields.university) {
-      if (!universityInfo[field as keyof typeof universityInfo]) {
-        throw new Error(`Le champ ${field} est obligatoire dans les informations universitaires`)
-      }
-    }
-
-    // Check student address
-    for (const field of requiredFields.studentAddress) {
-      if (!studentAddress[field as keyof typeof studentAddress]) {
-        throw new Error(`Le champ ${field} est obligatoire dans l'adresse de l'étudiant`)
-      }
-    }
-
-    // Check bac info
-    for (const field of requiredFields.bac) {
-      if (!bacInfo[field as keyof typeof bacInfo]) {
-        throw new Error(`Le champ ${field} est obligatoire dans les informations du baccalauréat`)
-      }
-    }
-
-    // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (studentAddress.email1 && !emailRegex.test(studentAddress.email1)) {
-      throw new Error('L\'email principal n\'est pas valide')
-    }
-    if (studentAddress.email2 && !emailRegex.test(studentAddress.email2)) {
-      throw new Error('L\'email secondaire n\'est pas valide')
-    }
-
-    // Phone validation
-    const phoneRegex = /^(\+212|0)[5-7][0-9]{8}$/
-    if (studentAddress.phone && !phoneRegex.test(studentAddress.phone)) {
-      throw new Error('Le numéro de téléphone n\'est pas valide')
-    }
-  }
-
-  useEffect(() => {
-    if (dbError) {
-      setErrorMessage("Erreur d'initialisation de la base de données: " + dbError.message)
-    }
-  }, [dbError])
+  const { execute: dbExecute } = useDatabaseOperation()
 
   const handleSave = async () => {
-    if (!isDatabaseReady) {
-      setErrorMessage("La base de données n'est pas prête")
-      return
-    }
-
-    setErrorMessage("")
-    setIsLoading(true)
-
     try {
-      // Validate form
-      validateForm()
-
       await dbExecute(async (repos) => {
-        // Generate IDs if not exists
-        if (!personalInfo.id) {
-          personalInfo.id = crypto.randomUUID()
-        }
-        
         // Save personal info
-        if (personalInfo.id) {
-          const exists = await repos.personalInfo.getById(personalInfo.id)
-          if (exists) {
-            await repos.personalInfo.update(personalInfo.id, personalInfo)
-          } else {
-            await repos.personalInfo.add(personalInfo)
-          }
-        }
+        await repos.personalInfo.add({
+          ...personalInfo,
+          id: personalInfo.id || crypto.randomUUID()
+        })
 
         // Save university info
-        if (universityInfo.id) {
-          const exists = await repos.university.getById(universityInfo.id)
-          if (exists) {
-            await repos.university.update(universityInfo.id, { ...universityInfo, studentId: personalInfo.id })
-          } else {
-            await repos.university.add({ ...universityInfo, studentId: personalInfo.id })
-          }
-        } else {
-          await repos.university.add({
-            ...universityInfo,
-            id: crypto.randomUUID(),
-            studentId: personalInfo.id
-          })
-        }
+        await repos.university.add({
+          ...universityInfo,
+          id: universityInfo.id || crypto.randomUUID(),
+          studentId: personalInfo.id
+        })
 
         // Save addresses
-        if (studentAddress.id) {
-          const exists = await repos.address.getById(studentAddress.id)
-          if (exists) {
-            await repos.address.update(studentAddress.id, { ...studentAddress, studentId: personalInfo.id })
-          } else {
-            await repos.address.add({ ...studentAddress, studentId: personalInfo.id })
-          }
-        } else {
-          await repos.address.add({
-            ...studentAddress,
-            id: crypto.randomUUID(),
-            studentId: personalInfo.id
-          })
-        }
-
-        if (parentAddress.id) {
-          const exists = await repos.address.getById(parentAddress.id)
-          if (exists) {
-            await repos.address.update(parentAddress.id, { ...parentAddress, studentId: personalInfo.id })
-          } else {
-            await repos.address.add({ ...parentAddress, studentId: personalInfo.id })
-          }
-        } else {
-          await repos.address.add({
-            ...parentAddress,
-            id: crypto.randomUUID(),
-            studentId: personalInfo.id
-          })
-        }
+        await repos.address.add({
+          ...studentAddress,
+          id: studentAddress.id || crypto.randomUUID(),
+          studentId: personalInfo.id
+        })
+        await repos.address.add({
+          ...parentAddress,
+          id: parentAddress.id || crypto.randomUUID(),
+          studentId: personalInfo.id
+        })
 
         // Save baccalaureat info
-        if (bacInfo.id) {
-          const exists = await repos.baccalaureat.getById(bacInfo.id)
-          if (exists) {
-            await repos.baccalaureat.update(bacInfo.id, { ...bacInfo, studentId: personalInfo.id })
-          } else {
-            await repos.baccalaureat.add({ ...bacInfo, studentId: personalInfo.id })
-          }
-        } else {
-          await repos.baccalaureat.add({
-            ...bacInfo,
-            id: crypto.randomUUID(),
-            studentId: personalInfo.id
-          })
-        }
+        await repos.baccalaureat.add({
+          ...bacInfo,
+          id: bacInfo.id || crypto.randomUUID(),
+          studentId: personalInfo.id
+        })
 
         // Save higher education info
-        if (bac2Info.id) {
-          const exists = await repos.higherEducation.getById(bac2Info.id)
-          if (exists) {
-            await repos.higherEducation.update(bac2Info.id, { ...bac2Info, studentId: personalInfo.id })
-          } else {
-            await repos.higherEducation.add({ ...bac2Info, studentId: personalInfo.id })
-          }
-        } else {
-          await repos.higherEducation.add({
-            ...bac2Info,
-            id: crypto.randomUUID(),
-            studentId: personalInfo.id
-          })
-        }
-
-        if (bac3Info.id) {
-          const exists = await repos.higherEducation.getById(bac3Info.id)
-          if (exists) {
-            await repos.higherEducation.update(bac3Info.id, { ...bac3Info, studentId: personalInfo.id })
-          } else {
-            await repos.higherEducation.add({ ...bac3Info, studentId: personalInfo.id })
-          }
-        } else {
-          await repos.higherEducation.add({
-            ...bac3Info,
-            id: crypto.randomUUID(),
-            studentId: personalInfo.id
-          })
-        }
-
-        if (bac5Info.id) {
-          const exists = await repos.higherEducation.getById(bac5Info.id)
-          if (exists) {
-            await repos.higherEducation.update(bac5Info.id, { ...bac5Info, studentId: personalInfo.id })
-          } else {
-            await repos.higherEducation.add({ ...bac5Info, studentId: personalInfo.id })
-          }
-        } else {
-          await repos.higherEducation.add({
-            ...bac5Info,
-            id: crypto.randomUUID(),
-            studentId: personalInfo.id
-          })
-        }
+        await repos.higherEducation.add({
+          ...bac2Info,
+          id: bac2Info.id || crypto.randomUUID(),
+          studentId: personalInfo.id
+        })
+        await repos.higherEducation.add({
+          ...bac3Info,
+          id: bac3Info.id || crypto.randomUUID(),
+          studentId: personalInfo.id
+        })
+        await repos.higherEducation.add({
+          ...bac5Info,
+          id: bac5Info.id || crypto.randomUUID(),
+          studentId: personalInfo.id
+        })
 
         // Save complementary info
-        if (complementaryInfo.id) {
-          const exists = await repos.complementary.getById(complementaryInfo.id)
-          if (exists) {
-            await repos.complementary.update(complementaryInfo.id, { ...complementaryInfo, studentId: personalInfo.id })
-          } else {
-            await repos.complementary.add({ ...complementaryInfo, studentId: personalInfo.id })
-          }
-        } else {
-          await repos.complementary.add({
-            ...complementaryInfo,
-            id: crypto.randomUUID(),
-            studentId: personalInfo.id
-          })
-        }
+        await repos.complementary.add({
+          ...complementaryInfo,
+          id: complementaryInfo.id || crypto.randomUUID(),
+          studentId: personalInfo.id
+        })
       })
 
       setIsEditing(false)
       setPersonalInfoDialogOpen(false)
-      setHasUnsavedChanges(false)
       showSuccess("Informations enregistrées avec succès!")
     } catch (error) {
       console.error("Error saving data:", error)
-      setErrorMessage(error instanceof Error ? error.message : "Une erreur est survenue lors de l'enregistrement")
-    } finally {
-      setIsLoading(false)
+      // You might want to show an error message to the user here
     }
   }
 
   const handleCancel = () => {
-    if (hasUnsavedChanges) {
-      if (window.confirm('Voulez-vous vraiment annuler? Toutes les modifications non enregistrées seront perdues.')) {
-        setIsEditing(false)
-        setHasUnsavedChanges(false)
-      }
-    } else {
-      setIsEditing(false)
-    }
+    setIsEditing(false)
   }
 
   // Load data from database on mount
   useEffect(() => {
     const loadData = async () => {
-      if (!isDatabaseReady) {
-        setErrorMessage("La base de données n'est pas prête")
-        return
-      }
-      
-      setIsLoading(true)
-      setErrorMessage("")
       try {
         await dbExecute(async (repos) => {
           // Load personal info
@@ -522,14 +347,11 @@ export default function FormFillerPage() {
         })
       } catch (error) {
         console.error("Error loading data:", error)
-        setErrorMessage(error instanceof Error ? error.message : "Une erreur est survenue lors du chargement des données")
-      } finally {
-        setIsLoading(false)
       }
     }
 
     loadData()
-  }, [isDatabaseReady])
+  }, [])
 
   const showSuccess = (message: string) => {
     setSuccessMessage(message)
@@ -538,30 +360,24 @@ export default function FormFillerPage() {
 
   const getProfileCompletion = () => {
     const requiredFields = {
-      personal: ['cne', 'cin', 'firstName', 'lastName', 'birthDate', 'birthPlace', 'birthProvince', 'gender', 'nationality'],
-      university: ['filiere'],
-      studentAddress: ['address', 'commune', 'province', 'email1', 'phone'],
-      bac: ['year', 'grade', 'bacType', 'institution', 'serie'],
-      parentAddress: ['address', 'commune', 'province']
+      personal: Object.keys(personalInfo).length,
+      university: Object.keys(universityInfo).length,
+      studentAddress: Object.keys(studentAddress).length,
+      parentAddress: Object.keys(parentAddress).length,
+      bac: Object.keys(bacInfo).length,
+      bac2: Object.keys(bac2Info).length
     }
 
     const filledFields = {
-      personal: requiredFields.personal.filter(field => personalInfo[field as keyof typeof personalInfo]).length,
-      university: requiredFields.university.filter(field => universityInfo[field as keyof typeof universityInfo]).length,
-      studentAddress: requiredFields.studentAddress.filter(field => studentAddress[field as keyof typeof studentAddress]).length,
-      parentAddress: requiredFields.parentAddress.filter(field => parentAddress[field as keyof typeof parentAddress]).length,
-      bac: requiredFields.bac.filter(field => bacInfo[field as keyof typeof bacInfo]).length
+      personal: Object.values(personalInfo).filter(v => v !== "" && v !== null && v !== undefined).length,
+      university: Object.values(universityInfo).filter(v => v !== "" && v !== null && v !== undefined).length,
+      studentAddress: Object.values(studentAddress).filter(v => v !== "" && v !== null && v !== undefined).length,
+      parentAddress: Object.values(parentAddress).filter(v => v !== "" && v !== null && v !== undefined).length,
+      bac: Object.values(bacInfo).filter(v => v !== "" && v !== null && v !== undefined).length,
+      bac2: Object.values(bac2Info).filter(v => v !== "" && v !== null && v !== undefined).length
     }
 
-    const requiredCounts = {
-      personal: requiredFields.personal.length,
-      university: requiredFields.university.length,
-      studentAddress: requiredFields.studentAddress.length,
-      parentAddress: requiredFields.parentAddress.length,
-      bac: requiredFields.bac.length
-    }
-
-    const totalRequired = Object.values(requiredCounts).reduce((a, b) => a + b, 0)
+    const totalRequired = Object.values(requiredFields).reduce((a, b) => a + b, 0)
     const totalFilled = Object.values(filledFields).reduce((a, b) => a + b, 0)
     
     return Math.round((totalFilled / totalRequired) * 100)
@@ -643,12 +459,6 @@ export default function FormFillerPage() {
           </div>
         )}
 
-        {errorMessage && (
-          <div className="fixed bottom-4 right-4 bg-red-100 text-red-800 px-4 py-2 rounded-lg shadow-lg">
-            {errorMessage}
-          </div>
-        )}
-
         {/* Personal Information Dialog */}
         <Dialog open={personalInfoDialogOpen} onOpenChange={setPersonalInfoDialogOpen}>
           <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -667,13 +477,9 @@ export default function FormFillerPage() {
                   ) : (
                     <div className="flex items-center space-x-2">
                       <Button variant="outline" onClick={handleCancel}>Cancel</Button>
-                      <Button 
-                        onClick={handleSave} 
-                        className="flex items-center space-x-2"
-                        disabled={isLoading}
-                      >
+                      <Button onClick={handleSave} className="flex items-center space-x-2">
                         <Save className="h-4 w-4" />
-                        <span>{isLoading ? 'Saving...' : 'Save Changes'}</span>
+                        <span>Save Changes</span>
                       </Button>
                     </div>
                   )}

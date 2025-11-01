@@ -3,6 +3,15 @@
  * Exports all repositories and utilities
  */
 
+import { Address } from "./address_info.table";
+import { Baccalaureat } from "./baccalaureat_info.table";
+import { Complementary } from "./complementary_info.table";
+import { Documents } from "./documents.table";
+import { HigherEducation } from "./higher_education.table";
+import { PersonalInfoRepository } from "./personal_info.table";
+import { University } from "./university_info.table";
+import { Users } from "./users.table";
+
 // Core
 export { DB, storeDefinitions, type StoreDefinition } from "./index.table";
 

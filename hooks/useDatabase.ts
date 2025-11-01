@@ -1,1 +1,205 @@
-'use client';\n\nimport { useEffect, useState, useCallback } from 'react';\nimport DatabaseService from '@/utils/db';\nimport type {\n  Users,\n  Documents,\n  Address,\n  University,\n  HigherEducation,\n  Complementary,\n  Baccalaureat,\n  PersonalInfoRepository,\n} from '@/utils/db';\n\n/**\n * Type-safe repository collection\n */\nexport interface DatabaseRepositories {\n  users: Users;\n  documents: Documents;\n  address: Address;\n  university: University;\n  higherEducation: HigherEducation;\n  complementary: Complementary;\n  baccalaureat: Baccalaureat;\n  personalInfo: PersonalInfoRepository;\n}\n\n/**\n * Hook for accessing the IndexedDB database from React components\n *\n * @example\n * ```tsx\n * const { repos, isReady, error } = useDatabase();\n *\n * useEffect(() => {\n *   if (isReady) {\n *     repos.users.getAll().then(users => console.log(users));\n *   }\n * }, [isReady, repos]);\n * ```\n */\nexport function useDatabase() {\n  const [isReady, setIsReady] = useState(false);\n  const [error, setError] = useState<Error | null>(null);\n  const [repos] = useState<DatabaseRepositories>(\n    DatabaseService.getAllRepositories() as unknown as DatabaseRepositories\n  );\n\n  // Initialize database on mount\n  useEffect(() => {\n    try {\n      // Database is ready immediately since DatabaseService handles initialization\n      setIsReady(true);\n      setError(null);\n    } catch (err) {\n      const error = err instanceof Error ? err : new Error(String(err));\n      setError(error);\n      setIsReady(false);\n    }\n  }, []);\n\n  return { repos, isReady, error };\n}\n\n/**\n * Hook for database operations with automatic error handling\n *\n * @example\n * ```tsx\n * const { execute, loading, error } = useDatabaseOperation();\n *\n * const handleSave = async () => {\n *   await execute(async (repos) => {\n *     return repos.users.add(userData);\n *   });\n * };\n * ```\n */\nexport function useDatabaseOperation<T = any>() {\n  const { repos, isReady } = useDatabase();\n  const [loading, setLoading] = useState(false);\n  const [error, setError] = useState<Error | null>(null);\n\n  const execute = useCallback(\n    async (operation: (repos: DatabaseRepositories) => Promise<T>): Promise<T | null> => {\n      if (!isReady) {\n        const err = new Error('Database is not ready');\n        setError(err);\n        throw err;\n      }\n\n      setLoading(true);\n      setError(null);\n\n      try {\n        const result = await operation(repos);\n        return result;\n      } catch (err) {\n        const error = err instanceof Error ? err : new Error(String(err));\n        setError(error);\n        throw error;\n      } finally {\n        setLoading(false);\n      }\n    },\n    [repos, isReady]\n  );\n\n  return { execute, loading, error, isReady };\n}\n\n/**\n * Hook for managing a collection of records from the database\n *\n * @example\n * ```tsx\n * const { data, loading, refresh, add, update, delete: remove } = \n   useCollection((repos) => repos.users.getAll());\n *\n * useEffect(() => {\n *   refresh();\n * }, []);\n * ```\n */\nexport function useCollection<T>(\n  fetcher: (repos: DatabaseRepositories) => Promise<T[]>\n) {\n  const { repos, isReady } = useDatabase();\n  const [data, setData] = useState<T[]>([]);\n  const [loading, setLoading] = useState(false);\n  const [error, setError] = useState<Error | null>(null);\n\n  const refresh = useCallback(async () => {\n    if (!isReady) return;\n\n    setLoading(true);\n    setError(null);\n\n    try {\n      const result = await fetcher(repos);\n      setData(result);\n    } catch (err) {\n      const error = err instanceof Error ? err : new Error(String(err));\n      setError(error);\n    } finally {\n      setLoading(false);\n    }\n  }, [repos, isReady, fetcher]);\n\n  // Auto-fetch on mount\n  useEffect(() => {\n    refresh();\n  }, [refresh]);\n\n  return { data, loading, error, refresh, setData };\n}\n\n/**\n * Hook for managing a single record from the database\n *\n * @example\n * ```tsx\n * const { data, loading, refetch } = useRecord(\n *   (repos) => repos.users.getById(userId)\n * );\n * ```\n */\nexport function useRecord<T>(\n  fetcher: (repos: DatabaseRepositories) => Promise<T | undefined>,\n  dependencies: any[] = []\n) {\n  const { repos, isReady } = useDatabase();\n  const [data, setData] = useState<T | null>(null);\n  const [loading, setLoading] = useState(false);\n  const [error, setError] = useState<Error | null>(null);\n\n  const refetch = useCallback(async () => {\n    if (!isReady) return;\n\n    setLoading(true);\n    setError(null);\n\n    try {\n      const result = await fetcher(repos);\n      setData(result || null);\n    } catch (err) {\n      const error = err instanceof Error ? err : new Error(String(err));\n      setError(error);\n    } finally {\n      setLoading(false);\n    }\n  }, [repos, isReady, fetcher]);\n\n  useEffect(() => {\n    refetch();\n  }, [refetch, ...dependencies]);\n\n  return { data, loading, error, refetch };\n}\n"
+'use client'
+
+import { useEffect, useState, useCallback } from 'react'
+import DatabaseService from '@/utils/db'
+import { DB } from '@/utils/db/index.table'
+import type {
+  Users,
+  Documents,
+  Address,
+  University,
+  HigherEducation,
+  Complementary,
+  Baccalaureat,
+  PersonalInfoRepository,
+} from '@/utils/db'
+
+/**
+ * Type-safe repository collection
+ */
+export interface DatabaseRepositories {
+  users: Users
+  documents: Documents
+  address: Address
+  university: University
+  higherEducation: HigherEducation
+  complementary: Complementary
+  baccalaureat: Baccalaureat
+  personalInfo: PersonalInfoRepository
+}
+
+/**
+ * Hook for accessing the IndexedDB database from React components
+ *
+ * @example
+ * ```tsx
+ * const { repos, isReady, error } = useDatabase()
+ *
+ * useEffect(() => {
+ *   if (isReady) {
+ *     repos.users.getAll().then(users => console.log(users))
+ *   }
+ * }, [isReady, repos])
+ * ```
+ */
+export function useDatabase() {
+  const [isReady, setIsReady] = useState(false)
+  const [error, setError] = useState<Error | null>(null)
+
+  const [repos] = useState<DatabaseRepositories>(
+    DatabaseService.getAllRepositories() as unknown as DatabaseRepositories
+  )
+
+  // Initialize database on mount
+  useEffect(() => {
+    const initDB = async () => {
+      try {
+        const db = await DB()
+        if (db) {
+          setIsReady(true)
+          setError(null)
+        }
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err))
+        setError(error)
+        setIsReady(false)
+      }
+    }
+    initDB()
+  }, [])
+
+  return { repos, isReady, error }
+}
+
+/**
+ * Hook for database operations with automatic error handling
+ *
+ * @example
+ * ```tsx
+ * const { execute, loading, error } = useDatabaseOperation()
+ *
+ * const handleSave = async () => {
+ *   await execute(async (repos) => {
+ *     return repos.users.add(userData)
+ *   })
+ * }
+ * ```
+ */
+export function useDatabaseOperation<T = any>() {
+  const { repos, isReady } = useDatabase()
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<Error | null>(null)
+
+  const execute = useCallback(
+    async (operation: (repos: DatabaseRepositories) => Promise<T>): Promise<T | null> => {
+      if (!isReady) {
+        const err = new Error('Database is not ready')
+        setError(err)
+        throw err
+      }
+
+      setLoading(true)
+      setError(null)
+
+      try {
+        const result = await operation(repos)
+        return result
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err))
+        setError(error)
+        throw error
+      } finally {
+        setLoading(false)
+      }
+    },
+    [repos, isReady]
+  )
+
+  return { execute, loading, error, isReady }
+}
+
+/**
+ * Hook for managing a collection of records from the database
+ *
+ * @example
+ * ```tsx
+ * const { data, loading, refresh, setData } =
+ *   useCollection((repos) => repos.users.getAll())
+ *
+ * useEffect(() => {
+ *   refresh()
+ * }, [])
+ * ```
+ */
+export function useCollection<T>(fetcher: (repos: DatabaseRepositories) => Promise<T[]>) {
+  const { repos, isReady } = useDatabase()
+  const [data, setData] = useState<T[]>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<Error | null>(null)
+
+  const refresh = useCallback(async () => {
+    if (!isReady) return
+
+    setLoading(true)
+    setError(null)
+
+    try {
+      const result = await fetcher(repos)
+      setData(result)
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error(String(err))
+      setError(error)
+    } finally {
+      setLoading(false)
+    }
+  }, [repos, isReady, fetcher])
+
+  // Auto-fetch on mount
+  useEffect(() => {
+    refresh()
+  }, [refresh])
+
+  return { data, loading, error, refresh, setData }
+}
+
+/**
+ * Hook for managing a single record from the database
+ *
+ * @example
+ * ```tsx
+ * const { data, loading, error, refetch } =
+ *   useRecord((repos) => repos.users.getById(userId), [userId])
+ * ```
+ */
+export function useRecord<T>(
+  fetcher: (repos: DatabaseRepositories) => Promise<T | undefined>,
+  dependencies: any[] = []
+) {
+  const { repos, isReady } = useDatabase()
+  const [data, setData] = useState<T | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<Error | null>(null)
+
+  const refetch = useCallback(async () => {
+    if (!isReady) return
+
+    setLoading(true)
+    setError(null)
+
+    try {
+      const result = await fetcher(repos)
+      setData(result || null)
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error(String(err))
+      setError(error)
+    } finally {
+      setLoading(false)
+    }
+  }, [repos, isReady, fetcher])
+
+  useEffect(() => {
+    refetch()
+  }, [refetch, ...dependencies])
+
+  return { data, loading, error, refetch }
+}
