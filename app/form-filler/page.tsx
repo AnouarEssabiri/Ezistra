@@ -53,6 +53,56 @@ import type {
 } from '@/utils/db'
 
 export default function FormFillerPage() {
+  // Export all form data as JSON
+  const handleExportData = async () => {
+    const exportData = {
+      personalInfo: personalInfo,
+      universityInfo: universityInfo,
+      studentAddress: studentAddress,
+      parentAddress: parentAddress,
+      bacInfo: bacInfo,
+      bac2Info: bac2Info,
+      bac3Info: bac3Info,
+      bac5Info: bac5Info,
+      complementaryInfo: complementaryInfo,
+      documents: documents,
+    };
+    const dataStr = JSON.stringify(exportData, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'ezistra-form-data.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showSuccess('Export réussi !');
+  };
+
+  // Import data from JSON file
+  const handleImportData = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const imported = JSON.parse(text);
+      setPersonalInfo(imported.personalInfo || personalInfo);
+      setUniversityInfo(imported.universityInfo || universityInfo);
+      setStudentAddress(imported.studentAddress || studentAddress);
+      setParentAddress(imported.parentAddress || parentAddress);
+      setBacInfo(imported.bacInfo || bacInfo);
+      setBac2Info(imported.bac2Info || bac2Info);
+      setBac3Info(imported.bac3Info || bac3Info);
+      setBac5Info(imported.bac5Info || bac5Info);
+      setComplementaryInfo(imported.complementaryInfo || complementaryInfo);
+      setDocuments(imported.documents || documents);
+      setHasUnsavedChanges(true);
+      showSuccess('Import réussi !');
+    } catch (err) {
+      setErrorMessage("Erreur lors de l'importation du fichier");
+    }
+  };
   const [personalInfoDialogOpen, setPersonalInfoDialogOpen] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [successMessage, setSuccessMessage] = useState("")
@@ -576,7 +626,6 @@ export default function FormFillerPage() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">AI Form Assistant</h1>
           <p className="text-gray-600 mb-6">Enter your information once, let AI handle the form filling</p>
-          
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
             <Button 
               onClick={() => setPersonalInfoDialogOpen(true)}
@@ -586,15 +635,39 @@ export default function FormFillerPage() {
               <User className="h-5 w-5" />
               <span>Update Your Information</span>
             </Button>
-            
             <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-lg">
               <span className="text-sm text-gray-600">Profile Completion:</span>
               <Badge variant="secondary" className="text-base">
                 {getProfileCompletion()}%
               </Badge>
             </div>
+            {/* Import/Export Buttons */}
+            <Button
+              variant="outline"
+              className="flex items-center space-x-2"
+              onClick={handleExportData}
+            >
+              <FileText className="h-5 w-5" />
+              <span>Export Data</span>
+            </Button>
+            <Button
+              variant="outline"
+              className="flex items-center space-x-2"
+              onClick={() => document.getElementById('import-data-input')?.click()}
+            >
+              <FileCheck className="h-5 w-5" />
+              <span>Import Data</span>
+            </Button>
+            <input
+              id="import-data-input"
+              type="file"
+              accept="application/json"
+              style={{ display: 'none' }}
+              onChange={handleImportData}
+            />
           </div>
         </div>
+  {/* // ...existing code... */}
 
         {/* Instructions Card */}
         <Card className="mb-8">
