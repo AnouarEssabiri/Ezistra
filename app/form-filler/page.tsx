@@ -26,7 +26,9 @@ import {
   Home,
   Book,
   FileText,
+  Upload,
 } from "lucide-react"
+import { uploadBackup, downloadLatestBackup, BackupBlob } from '@/utils/sync'
 import { useState, useEffect } from "react"
 import Navigation from "@/components/Navigation"
 import { Switch } from "@/components/ui/switch"
@@ -657,6 +659,76 @@ export default function FormFillerPage() {
             >
               <FileCheck className="h-5 w-5" />
               <span>Import Data</span>
+            </Button>
+            <Button
+              variant="outline"
+              className="flex items-center space-x-2"
+              onClick={async () => {
+                try {
+                  setIsLoading(true)
+                  const backup: BackupBlob = {
+                    backupId: crypto.randomUUID(),
+                    clientId: typeof window !== 'undefined' ? navigator.userAgent : 'unknown',
+                    createdAt: new Date().toISOString(),
+                    stores: {
+                      personalInfo: [personalInfo],
+                      universityInfo: [universityInfo],
+                      studentAddress: [studentAddress],
+                      parentAddress: [parentAddress],
+                      bacInfo: [bacInfo],
+                      bac2Info: [bac2Info],
+                      bac3Info: [bac3Info],
+                      bac5Info: [bac5Info],
+                      complementaryInfo: [complementaryInfo],
+                      documents: documents,
+                    },
+                  }
+
+                  await uploadBackup(backup)
+                  showSuccess('Backup uploaded to cloud')
+                } catch (err) {
+                  console.error('Cloud backup failed', err)
+                  setErrorMessage(err instanceof Error ? err.message : 'Cloud backup failed')
+                } finally {
+                  setIsLoading(false)
+                }
+              }}
+            >
+              <Upload className="h-5 w-5" />
+              <span>Backup to Cloud</span>
+            </Button>
+            <Button
+              variant="outline"
+              className="flex items-center space-x-2"
+              onClick={async () => {
+                try {
+                  setIsLoading(true)
+                  const remote = await downloadLatestBackup()
+                  // remote is expected to be our BackupBlob shape
+                  const imported = remote as BackupBlob
+                  const stores = imported.stores || {}
+                  setPersonalInfo(stores.personalInfo?.[0] || personalInfo)
+                  setUniversityInfo(stores.universityInfo?.[0] || universityInfo)
+                  setStudentAddress(stores.studentAddress?.[0] || studentAddress)
+                  setParentAddress(stores.parentAddress?.[0] || parentAddress)
+                  setBacInfo(stores.bacInfo?.[0] || bacInfo)
+                  setBac2Info(stores.bac2Info?.[0] || bac2Info)
+                  setBac3Info(stores.bac3Info?.[0] || bac3Info)
+                  setBac5Info(stores.bac5Info?.[0] || bac5Info)
+                  setComplementaryInfo(stores.complementaryInfo?.[0] || complementaryInfo)
+                  setDocuments(stores.documents || documents)
+                  setHasUnsavedChanges(true)
+                  showSuccess('Backup restored from cloud (preview). Remember to Save to persist locally.')
+                } catch (err) {
+                  console.error('Cloud restore failed', err)
+                  setErrorMessage(err instanceof Error ? err.message : 'Cloud restore failed')
+                } finally {
+                  setIsLoading(false)
+                }
+              }}
+            >
+              <FileText className="h-5 w-5" />
+              <span>Restore from Cloud</span>
             </Button>
             <input
               id="import-data-input"
