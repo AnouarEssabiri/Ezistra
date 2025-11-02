@@ -20,6 +20,7 @@ export default function Navigation() {
 
   const navItems = [
     { href: "/dashboard", label: "Dashboard" },
+    { href: "/activities", label: "Activities" },
     { href: "/documents", label: "Documents" },
     { href: "/form-filler", label: "Form Filler" },
     { href: "/document-processor", label: "Document Processor" },
