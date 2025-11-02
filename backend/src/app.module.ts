@@ -4,6 +4,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
+import { SyncModule } from './modules/sync/sync.module';
 import { SupabaseModule } from './modules/supabase/supabase.module';
 import { RedisModule } from './modules/redis/redis.module';
 
@@ -17,6 +18,8 @@ import { RedisModule } from './modules/redis/redis.module';
     RedisModule,
     AuthModule,
     UsersModule,
+  // Sync module provides cloud backup endpoints for IndexedDB
+  SyncModule,
   ],
   controllers: [AppController],
   providers: [AppService],
