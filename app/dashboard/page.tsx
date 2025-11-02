@@ -2,6 +2,16 @@
 
 import { Dashboard } from "./dashboard"
 import { Button } from "@/components/ui/button"
+import { useState } from "react"
+
+interface Activity {
+  id: number
+  type: string
+  title: string
+  description: string
+  time: string
+  status: "pending" | "completed" | "rejected"
+}
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
@@ -26,14 +36,14 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import Navigation from "@/components/Navigation"
 
 export default function DashboardPage() {
-  const recentActivities = [
+  const [activities, setActivities] = useState<Activity[]>([
     {
       id: 1,
       type: "form_filled",
       title: "School Registration Form",
       description: "Automatically filled registration for Lincoln High School",
       time: "2 hours ago",
-      status: "completed",
+      status: "pending",
     },
     {
       id: 2,
@@ -41,7 +51,7 @@ export default function DashboardPage() {
       title: "Birth Certificate",
       description: "New document uploaded and categorized",
       time: "1 day ago",
-      status: "completed",
+      status: "pending",
     },
     {
       id: 3,
@@ -51,7 +61,19 @@ export default function DashboardPage() {
       time: "2 days ago",
       status: "pending",
     },
-  ]
+  ])
+
+  const handleComplete = (id: number) => {
+    setActivities(activities.map(activity => 
+      activity.id === id ? {...activity, status: "completed"} : activity
+    ))
+  }
+
+  const handleReject = (id: number) => {
+    setActivities(activities.map(activity => 
+      activity.id === id ? {...activity, status: "rejected"} : activity
+    ))
+  }
 
   const documents = [
     {
@@ -89,13 +111,6 @@ export default function DashboardPage() {
 
       <div className="p-6 max-w-7xl mx-auto">
         {/* Database Dashboard */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">Dashboard</h1>
-          <Dashboard />
-        </div>
-
-        {/* Original Dashboard Section */}
-        <hr className="my-8" />
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Welcome back, John!</h2>
           <p className="text-gray-600">Here's what's happening with your documents and forms.</p>
@@ -159,11 +174,13 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {recentActivities.map((activity) => (
+                  {activities.map((activity) => (
                     <div key={activity.id} className="flex items-start space-x-4 p-4 rounded-lg border">
                       <div className="flex-shrink-0">
                         {activity.status === "completed" ? (
                           <CheckCircle className="h-5 w-5 text-green-500" />
+                        ) : activity.status === "rejected" ? (
+                          <AlertCircle className="h-5 w-5 text-red-500" />
                         ) : (
                           <AlertCircle className="h-5 w-5 text-yellow-500" />
                         )}
@@ -171,9 +188,33 @@ export default function DashboardPage() {
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-gray-900">{activity.title}</p>
                         <p className="text-sm text-gray-600">{activity.description}</p>
-                        <div className="flex items-center mt-2 space-x-2">
-                          <Clock className="h-3 w-3 text-gray-400" />
-                          <span className="text-xs text-gray-500">{activity.time}</span>
+                        <div className="flex items-center justify-between mt-2">
+                          <div className="flex items-center space-x-2">
+                            <Clock className="h-3 w-3 text-gray-400" />
+                            <span className="text-xs text-gray-500">{activity.time}</span>
+                          </div>
+                          {activity.status === "pending" && (
+                            <div className="flex space-x-2">
+                              <Button 
+                                size="sm" 
+                                variant="outline" 
+                                className="text-green-600 hover:text-green-700"
+                                onClick={() => handleComplete(activity.id)}
+                              >
+                                <CheckCircle className="h-4 w-4 mr-1" />
+                                Complete
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                variant="outline" 
+                                className="text-red-600 hover:text-red-700"
+                                onClick={() => handleReject(activity.id)}
+                              >
+                                <AlertCircle className="h-4 w-4 mr-1" />
+                                Reject
+                              </Button>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -191,19 +232,19 @@ export default function DashboardPage() {
                 <CardDescription>Common tasks and shortcuts</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Button className="w-full justify-start bg-transparent" variant="outline">
+                <Button className="w-full justify-start" variant="outline">
                   <Upload className="h-4 w-4 mr-2" />
                   Upload Document
                 </Button>
-                <Button className="w-full justify-start bg-transparent" variant="outline">
+                <Button className="w-full justify-start" variant="outline">
                   <Zap className="h-4 w-4 mr-2" />
                   Fill New Form
                 </Button>
-                <Button className="w-full justify-start bg-transparent" variant="outline">
+                <Button className="w-full justify-start" variant="outline">
                   <Calendar className="h-4 w-4 mr-2" />
                   Set Reminder
                 </Button>
-                <Button className="w-full justify-start bg-transparent" variant="outline">
+                <Button className="w-full justify-start" variant="outline">
                   <Search className="h-4 w-4 mr-2" />
                   Search Documents
                 </Button>
