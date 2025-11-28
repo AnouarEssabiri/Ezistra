@@ -2,7 +2,8 @@ import type { Metadata } from 'next'
 import { GeistSans } from 'geist/font/sans'
 import { GeistMono } from 'geist/font/mono'
 import './globals.css'
-import { AuthProvider } from "@/components/AuthContext";
+import { AuthProvider } from "@/components/AuthContext"
+import { ProtectedRoute } from "@/components/ProtectedRoute"
 
 export const metadata: Metadata = {
   title: 'v0 App',
@@ -28,7 +29,9 @@ html {
       </head>
       <body>
         <AuthProvider>
-          {children}
+          <ProtectedRoute>
+            {children}
+          </ProtectedRoute>
         </AuthProvider>
       </body>
     </html>

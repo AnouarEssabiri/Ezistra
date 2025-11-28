@@ -33,8 +33,8 @@ export default function Navigation() {
     return null;
   }
 
-  // Hide navigation if not authenticated
-  if (!isAuthenticated) {
+  // Hide navigation on auth pages, but show on home page even if not authenticated
+  if (!isAuthenticated && pathname !== "/" && pathname !== "/signup") {
     return null;
   }
 
@@ -62,51 +62,67 @@ export default function Navigation() {
               <Shield className="h-8 w-8 text-blue-600" />
               <span className="text-2xl font-bold text-gray-900">Ezistra</span>
             </Link>
-            {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center space-x-6 ml-8">
-              {navItems.map((item) => (
-                <Button
-                  key={item.href}
-                  variant="ghost"
-                  onClick={() => handleNavigation(item.href, item.label)}
-                  disabled={isNavigating}
-                  className={
-                    pathname === item.href
-                      ? "text-blue-600 bg-blue-50"
-                      : ""
-                  }
-                >
-                  {isNavigating && navigatingTo === item.label ? (
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  ) : null}
-                  {item.label}
-                </Button>
-              ))}
-            </nav>
+            {/* Desktop Navigation - Only show when authenticated */}
+            {isAuthenticated && (
+              <nav className="hidden md:flex items-center space-x-6 ml-8">
+                {navItems.map((item) => (
+                  <Button
+                    key={item.href}
+                    variant="ghost"
+                    onClick={() => handleNavigation(item.href, item.label)}
+                    disabled={isNavigating}
+                    className={
+                      pathname === item.href
+                        ? "text-blue-600 bg-blue-50"
+                        : ""
+                    }
+                  >
+                    {isNavigating && navigatingTo === item.label ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    ) : null}
+                    {item.label}
+                  </Button>
+                ))}
+              </nav>
+            )}
             <div className="flex items-center space-x-4">
-              <Button variant="outline" size="sm" asChild className="hidden md:inline-flex">
-                <Link href="/dashboard">Get Started</Link>
-              </Button>
-              {/* Mobile Menu Button */}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={toggleMobileMenu}
-                className="md:hidden p-2"
-              >
-                {isMobileMenuOpen ? (
-                  <X className="h-5 w-5" />
-                ) : (
-                  <Menu className="h-5 w-5" />
-                )}
-              </Button>
-              <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
-                U
-              </div>
+              {/* Show buttons only when authenticated */}
+              {isAuthenticated ? (
+                <>
+                  <Button variant="outline" size="sm" asChild className="hidden md:inline-flex">
+                    <Link href="/dashboard">Dashboard</Link>
+                  </Button>
+                  {/* Mobile Menu Button */}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={toggleMobileMenu}
+                    className="md:hidden p-2"
+                  >
+                    {isMobileMenuOpen ? (
+                      <X className="h-5 w-5" />
+                    ) : (
+                      <Menu className="h-5 w-5" />
+                    )}
+                  </Button>
+                  <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
+                    U
+                  </div>
+                </>
+              ) : (
+                <>
+                  <Button variant="outline" size="sm" asChild className="hidden md:inline-flex">
+                    <Link href="/login">Login</Link>
+                  </Button>
+                  <Button size="sm" asChild className="hidden md:inline-flex">
+                    <Link href="/signup">Sign Up</Link>
+                  </Button>
+                </>
+              )}
             </div>
           </div>
-          {/* Mobile Navigation Menu */}
-          {isMobileMenuOpen && (
+          {/* Mobile Navigation Menu - Only show when authenticated */}
+          {isAuthenticated && isMobileMenuOpen && (
             <div className="md:hidden mt-4 pb-4 border-t pt-4">
               <nav className="flex flex-col space-y-2">
                 {navItems.map((item) => (
@@ -128,7 +144,7 @@ export default function Navigation() {
                   </Button>
                 ))}
                 <Button variant="outline" size="sm" asChild className="justify-start h-12 mt-2">
-                  <Link href="/dashboard">Get Started</Link>
+                  <Link href="/dashboard">Dashboard</Link>
                 </Button>
               </nav>
             </div>
